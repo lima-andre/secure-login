@@ -18,12 +18,10 @@
 </head>
 
 <body>
-  
-  <!-- INICIO NAV (alterar pra include)-->
-
+    
   <nav class="navbar navbar-default">
     <div class="container-fluid">
-      <div class="navbar-header">
+      <!-- div class="navbar-header">
 
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu" aria-expanded="false">
           <span class="sr-only">Toggle navigation</span>
@@ -49,11 +47,10 @@
           </li>
         </ul>
         
-      </div>
+      </div -->
     </div>
   </nav>
 
-  <!-- FINAL NAV -->
 	<jsp:doBody />
 
 <script src="<c:url value='/assets/js/jquery-2.1.4.min.js'/>"></script>

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import com.inf749.secureLogin.models.UserAccount;
 
@@ -32,5 +33,23 @@ public class UserAccountDao {
 	public void update(UserAccount userAccount)
 	{
 		entityManager.merge(userAccount);
+	}
+
+	public UserAccount login(UserAccount user) {
+
+		Query query = entityManager.createQuery("Select u from UserAccount u where "
+                + "username= :username and userpwd = :userpwd");
+        query.setParameter("username", user.getUserName());
+        query.setParameter("userpwd", user.getUserPwd());
+        
+        try{ 
+        	UserAccount userAccount = (UserAccount) query.getSingleResult();
+            if (user.getUserName().equalsIgnoreCase(userAccount.getUserName())&&user.getUserPwd().equals(userAccount.getUserPwd())) { 
+              return userAccount; 
+            }  
+            }catch(Exception e){ 	          
+               return null; 
+            }
+        return null; 
 	}
 }
