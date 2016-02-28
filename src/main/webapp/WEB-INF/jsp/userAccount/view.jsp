@@ -20,15 +20,14 @@
           <table class="table table-condensed table-bordered table-striped table-hover">
           		  <thead>
 	                  <tr>
-	                  	<td>Column 1</td>
-		                <td>Column 2</td>
-		                <td>Column 3</td>
-		                <td>Column 4</td>
-						<td>Column 5</td>
+	                  	<td>Connection ID</td>
+		                <td>IP Connection</td>
+		                <td>Date</td>
+		                <td>Valid Connection</td>
 	                  </tr>
                   </thead>
                   <tbody>
-                  <c:forEach items='${paginatedList.currentList}' var='history'>         		
+                  <c:forEach items='${history}' var='history'>         		
 	                  <tr>
 						<td>${history.idConnection}</td>
 		                <td>${history.ipConnection}</td>

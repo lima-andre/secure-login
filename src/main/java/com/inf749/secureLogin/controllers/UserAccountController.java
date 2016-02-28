@@ -34,6 +34,8 @@ public class UserAccountController {
 	 @Inject
 	 private ConnectionHistoryDao historyDao;
 	 @Inject
+	 private ConnectionHistoryController connectionHistory;
+	 @Inject
 	 private Validator validator;
 	 private static UserSession userSession;
 	 private final Result result;
@@ -102,7 +104,7 @@ public class UserAccountController {
 				  history.setUserId(userId);
 				  history.setValidConnection(true);
 				
-				  //historyDao.save(history);
+				  connectionHistory.addHistory(history);
 				  
 				  long endTime = System.currentTimeMillis();
 				  
@@ -221,11 +223,6 @@ public class UserAccountController {
 	 public void add(UserAccount userAccount) {
 		 dao.save(userAccount);
 		 result.redirectTo(UserAccountController.class).list();
-	 }
-	 
-	 @Transactional
-	 public void addHistory(ConnectionHistory history) {
-		 historyDao.save(history);
 	 }
 
 	 @Get("/view/{id}")

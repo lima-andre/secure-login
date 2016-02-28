@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.inf749.secureLogin.models.ConnectionHistory;
+import com.inf749.secureLogin.models.PaginatedList;
 
 public class ConnectionHistoryDao {
 	
@@ -39,4 +40,9 @@ public class ConnectionHistoryDao {
                return null; 
             } 
 	}
+	
+	public PaginatedList paginated(int page, int max)
+	   {
+	      return new PaginatorQueryHelper().list(entityManager, ConnectionHistory.class, page, max);
+	   }
 }
