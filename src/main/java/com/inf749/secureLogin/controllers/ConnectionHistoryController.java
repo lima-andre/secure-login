@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import br.com.caelum.vraptor.Controller;
+import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Result;
 
@@ -28,6 +29,7 @@ public class ConnectionHistoryController {
 		this.result = result;
 	}
 	 
+	 @Get("/addHistoryConnected")
 	 @Transactional
 	 public void addHistoryConnected(ConnectionHistory history, UserSession userSession, Integer userId) {
 		 historyDao.save(history);
@@ -35,6 +37,7 @@ public class ConnectionHistoryController {
 		 result.redirectTo(UserAccountController.class).view(userId, userSession);
 	 }
 	 
+	 @Get("/addHistoryNotConnected")
 	 @Transactional
 	 public void addHistoryNotConnected(ConnectionHistory history, UserSession userSession) {
 		 historyDao.save(history);

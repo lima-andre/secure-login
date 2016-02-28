@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import br.com.caelum.vraptor.Controller;
@@ -34,26 +35,24 @@ public class UserAccountController {
 	 @Inject
 	 private ConnectionHistoryDao historyDao;
 	 @Inject
-	 private ConnectionHistoryController connectionHistory;
-	 @Inject
 	 private Validator validator;
 	 private static UserSession userSession;
 	 private final Result result;
 	 private static long waitTimeBeforeResponse;
 	 private static UserAccount staticUserAccount;
 	 
-	 private static Object monitor = new Object();
-	 
 	 private static UserAccountDao staticDao;
+	 private final HttpServletRequest request;
 		
 	 public UserAccountController() {
-		this(null, null);
+		this(null, null, null);
 	 }
 	 
 	@Inject
-	public UserAccountController(Result result, UserSession userSession) {
+	public UserAccountController(Result result, UserSession userSession, HttpServletRequest request) {
 		this.result = result;
 		this.userSession = userSession;
+		this.request = request;
 	}
 	
 	@Get("/login")
@@ -65,6 +64,9 @@ public class UserAccountController {
 	public void login(final UserAccount userAccount) {
 		long initialTime = System.currentTimeMillis(); 
 		
+		waitTimeBeforeResponse = RealTimeHelper.MAX_RESPONSE_TIME * RealTimeHelper.MILLISECONDS;
+		tRealTimeResponse.run();
+		
 		try {
 			
 			staticDao = this.dao;
@@ -72,66 +74,41 @@ public class UserAccountController {
 			
 			 tLogin.run();
 			
-			 //loginWithTimeOut(dao, userAccount, initialTime);
-			
-			 if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
-				 
-				 ConnectionHistory history = new ConnectionHistory();
-				  history.setIpConnection("123452");
-				  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-				  history.setUserId(1);
-				  history.setValidConnection(false);
+			 //Syncronize to wait until response time constraint
+			 synchronized (tRealTimeResponse) {
+				 if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
+					 
+					 ConnectionHistory history = new ConnectionHistory();
+					 history.setIpConnection(request.getRemoteHost());
+					 history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+					 history.setUserId(1);
+					 history.setValidConnection(false);
+						
+					 long endTime = System.currentTimeMillis();
 					
-				long endTime = System.currentTimeMillis();
-				
-				long timePassed = RealTimeHelper.timePassed(initialTime, endTime);
-				
-				System.out.println("TIME ERROR : " + timePassed);  
-				
-				//Verify if need to run thread to wait until response time constraint
-				if(timePassed < RealTimeHelper.MAX_RESPONSE_TIME){
-					waitTimeBeforeResponse = (RealTimeHelper.MAX_RESPONSE_TIME - timePassed) * RealTimeHelper.MILLISECONDS;
-				  tRealTimeResponse.run();
-				}
-				
-				//Syncronize to wait until response time constraint
-				 synchronized (tRealTimeResponse) {
+					 System.out.println("TIME ERROR : " + RealTimeHelper.timePassed(initialTime, endTime));  
+					
 					 result.include("badUserLogin", "Username or password is not valid");
 					 result.redirectTo(ConnectionHistoryController.class).addHistoryNotConnected(history, userSession);
 				 }
-				}
-				else {
-				
-				  Integer userId = userSession.getUser().getUserId();
+				 else {
 					
-				  ConnectionHistory history = new ConnectionHistory();
-				  history.setIpConnection("123452");
-				  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-				  history.setUserId(userId);
-				  history.setValidConnection(true);
-				  
-				  long endTime = System.currentTimeMillis();
-				  
-				  long timePassed = RealTimeHelper.timePassed(initialTime, endTime);
-				  
-				  System.out.println("INTERMEDIATE TIME : " + timePassed);
-				  
-				  //Verify if need to run thread to wait until response time constraint
-				  if(timePassed < RealTimeHelper.MAX_RESPONSE_TIME){
-					  waitTimeBeforeResponse = (RealTimeHelper.MAX_RESPONSE_TIME - timePassed) * RealTimeHelper.MILLISECONDS;
-					  tRealTimeResponse.run();
-				  }
-				  
-				  //Syncronize to wait until response time constraint
-				  synchronized (tRealTimeResponse) {
-					  endTime = System.currentTimeMillis();
+					  Integer userId = userSession.getUser().getUserId();
+						
+					  ConnectionHistory history = new ConnectionHistory();
+					  history.setIpConnection(request.getRemoteHost());
+					  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+					  history.setUserId(userId);
+					  history.setValidConnection(true);
 					  
+					  long endTime = System.currentTimeMillis();
+						  
 					  System.out.println("FINAL TIME : " + RealTimeHelper.timePassed(initialTime, endTime));
-					  
+						  
 					  result.redirectTo(ConnectionHistoryController.class).addHistoryConnected(history, userSession, userId);
-				  }
-			        
-			}
+				        
+				}
+			 }
 			 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -148,63 +125,23 @@ public class UserAccountController {
 	   
 	 }
 	
-  /*private static UserAccount loginWithTimeOut(final UserAccountDao dao, final UserAccount userAccount, final long startTime) throws Exception {
-		
-		UserAccount user = null;
-		
-		try {
-			user = TimeoutForMethodsHelper.runWithTimeout(new Callable<UserAccount>() {
-				@Override
-				public UserAccount call() throws Exception {
-					return dao.login(userAccount);
-				}
-				
-			}, RealTimeHelper.MAX_RESPONSE_TIME, TimeUnit.SECONDS); 
-	       
-	    }
-	    catch (TimeoutException e) {
-	      log(startTime, "got timeout!");
-	    }
-		
-		return user;
-	}
-
-	  private static void log(long startTime, String msg) {
-	    long elapsedSeconds = (System.currentTimeMillis() - startTime);
-	    System.out.format("%1$5sms [%2$16s] %3$s\n", elapsedSeconds, Thread.currentThread().getName(), msg);
-	  }*/
+	// Thread to make a new login
+	public static Runnable tLogin = new Runnable() {
+	    public void run() {
+           try{
+            	userSession.login(staticDao.login(staticUserAccount));	
+          } catch (Exception e){}
+        }
+    };
 	
-	  public static Runnable tLogin = new Runnable() {
-		    
-	        public void run() {
-	            try{
-	            	userSession.login(staticDao.login(staticUserAccount));	
-	            } catch (Exception e){}
-
-	        }
-	    };
-	    
-	    public static Runnable tRealTimeResponse = new Runnable() {
-	        public void run() {
-	            try{
-	               Thread.sleep(waitTimeBeforeResponse);
-	            } catch (Exception e){}
-
-	        }
-	    };
-	    
-	    public static Runnable tMonitorLogin = new Runnable() {
-		    
-	        public void run() {
-	            try{
-	            	
-	            	/*while(){
-	            	}*/
-	            
-	            } catch (Exception e){}
-
-	        }
-	    };
+    // Thread to wait until response time constraint
+	public static Runnable tRealTimeResponse = new Runnable() {
+	    public void run() {
+	       try{
+	          Thread.sleep(waitTimeBeforeResponse);
+	       } catch (Exception e){}
+	    }
+	};
 	    
 	@Path("/logout")
 	public void logout() {
