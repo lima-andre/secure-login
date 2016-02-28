@@ -75,6 +75,12 @@ public class UserAccountController {
 			 //loginWithTimeOut(dao, userAccount, initialTime);
 			
 			 if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
+				 
+				 ConnectionHistory history = new ConnectionHistory();
+				  history.setIpConnection("123452");
+				  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+				  history.setUserId(1);
+				  history.setValidConnection(false);
 					
 				long endTime = System.currentTimeMillis();
 				
@@ -91,7 +97,7 @@ public class UserAccountController {
 				//Syncronize to wait until response time constraint
 				 synchronized (tRealTimeResponse) {
 					 result.include("badUserLogin", "Username or password is not valid");
-					 result.redirectTo(UserAccountController.class).loginForm();
+					 result.redirectTo(ConnectionHistoryController.class).addHistoryNotConnected(history, userSession);
 				 }
 				}
 				else {
@@ -99,12 +105,10 @@ public class UserAccountController {
 				  Integer userId = userSession.getUser().getUserId();
 					
 				  ConnectionHistory history = new ConnectionHistory();
-				  history.setIpConnection("1234"+userSession.getUser().getUserId());
+				  history.setIpConnection("123452");
 				  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 				  history.setUserId(userId);
 				  history.setValidConnection(true);
-				
-				  connectionHistory.addHistory(history);
 				  
 				  long endTime = System.currentTimeMillis();
 				  
@@ -124,7 +128,7 @@ public class UserAccountController {
 					  
 					  System.out.println("FINAL TIME : " + RealTimeHelper.timePassed(initialTime, endTime));
 					  
-					  result.redirectTo(UserAccountController.class).view(userId, userSession);
+					  result.redirectTo(ConnectionHistoryController.class).addHistoryConnected(history, userSession, userId);
 				  }
 			        
 			}
