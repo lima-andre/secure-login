@@ -21,5 +21,8 @@ public class UserSession {
 	
 	public void logout() {
 	    this.userAuthenticated = null;
-	  }
+	}
+	public UserAccount getUser(){
+		return userAuthenticated;
+	}
 }

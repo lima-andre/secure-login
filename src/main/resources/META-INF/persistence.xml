@@ -4,6 +4,7 @@
     <class>com.inf749.secureLogin.models.Category</class>
     <class>com.inf749.secureLogin.models.Product</class>
     <class>com.inf749.secureLogin.models.UserAccount</class>
+    <class>com.inf749.secureLogin.models.ConnectionHistory</class>
     <properties>
       <property name="javax.persistence.jdbc.user" value="securelogin"/>
       <property name="javax.persistence.jdbc.password" value="securelogin123"/>

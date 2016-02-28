@@ -27,11 +27,8 @@
 	     Admin Account:
 	    <input type="checkbox" name="userAccount.adminAccount" id="userAccount.adminAccount" checked="checked"/><br/>
 	
-    	<input type="submit" value="Save" />
+    	<input type="submit" value="Submit" />
 	</form>
-    </div>
-    <div class ="container min-container">   
-    	<a href="<c:url value="/useraccount/form"/>">Register</a>
-    </div>
+    </div>   
   </div>
 </template:admin>

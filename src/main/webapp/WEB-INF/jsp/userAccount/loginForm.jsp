@@ -19,6 +19,7 @@
 		</form>
     </div>
     <div class ="container min-container">   
+    	<span class="error">${badUserLogin}</span>
     	<a href="<c:url value="/useraccount/form"/>">Register</a>
     </div>
   </div>
