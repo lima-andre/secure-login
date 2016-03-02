@@ -85,7 +85,7 @@
                         <div class="col-sm-1">
 
                            <template:admin>
-							  <div>
+							  
 							    <div class ="container min-container">      
 							      <form role="form" action="add" method="POST" class="registration-form">
 							        <div class="form-group">
@@ -132,7 +132,7 @@
 							    	 <input type="submit" class="btn-large" value="Submit" />
 								</form>
 							    </div>   
-							  </div>
+							  
 							</template:admin>
 		                   
                         </div>
