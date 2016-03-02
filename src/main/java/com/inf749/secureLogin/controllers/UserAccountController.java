@@ -29,31 +29,7 @@ import br.com.caelum.vraptor.validator.Validator;
 @Controller
 @Path("/useraccount")
 public class UserAccountController {
-<<<<<<< HEAD
 
-	@Inject
-	private UserAccountDao dao;
-	@Inject
-	private ConnectionHistoryDao historyDao;
-	@Inject
-	private ConnectionHistoryController connectionHistory;
-	@Inject
-	private Validator validator;
-	private static UserSession userSession;
-	private final Result result;
-	private static long waitTimeBeforeResponse;
-	private static UserAccount staticUserAccount;
-
-	private static Object monitor = new Object();
-
-	private static UserAccountDao staticDao;
-
-	public UserAccountController() {
-		this(null, null);
-	}
-
-=======
-	
 	 @Inject
 	 private UserAccountDao dao;
 	 @Inject
@@ -72,7 +48,6 @@ public class UserAccountController {
 		this(null, null, null);
 	 }
 	 
->>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
 	@Inject
 	public UserAccountController(Result result, UserSession userSession, HttpServletRequest request) {
 		this.result = result;
@@ -87,88 +62,19 @@ public class UserAccountController {
 
 	@Post("/login")
 	public void login(final UserAccount userAccount) {
-<<<<<<< HEAD
-		long initialTime = System.currentTimeMillis();
 
-=======
 		long initialTime = System.currentTimeMillis(); 
 		
 		waitTimeBeforeResponse = RealTimeHelper.MAX_RESPONSE_TIME * RealTimeHelper.MILLISECONDS;
 		tRealTimeResponse.run();
 		
->>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
 		try {
 
 			staticDao = this.dao;
 			staticUserAccount = userAccount;
-<<<<<<< HEAD
 
 			tLogin.run();
-
-			// loginWithTimeOut(dao, userAccount, initialTime);
-
-			if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
-
-				long endTime = System.currentTimeMillis();
-
-				long timePassed = RealTimeHelper.timePassed(initialTime, endTime);
-
-				System.out.println("TIME ERROR : " + timePassed);
-
-				// Verify if need to run thread to wait until response time
-				// constraint
-				if (timePassed < RealTimeHelper.MAX_RESPONSE_TIME) {
-					waitTimeBeforeResponse = (RealTimeHelper.MAX_RESPONSE_TIME - timePassed)
-							* RealTimeHelper.MILLISECONDS;
-					tRealTimeResponse.run();
-				}
-
-				// Syncronize to wait until response time constraint
-				synchronized (tRealTimeResponse) {
-					result.include("badUserLogin", "Username or password is not valid");
-					result.redirectTo(UserAccountController.class).loginForm();
-				}
-			} else {
-
-				Integer userId = userSession.getUser().getUserId();
-
-				ConnectionHistory history = new ConnectionHistory();
-				history.setIpConnection("1234" + userSession.getUser().getUserId());
-				history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-				history.setUserId(userId);
-				history.setValidConnection(true);
-
-				connectionHistory.addHistory(history);
-
-				long endTime = System.currentTimeMillis();
-
-				long timePassed = RealTimeHelper.timePassed(initialTime, endTime);
-
-				System.out.println("INTERMEDIATE TIME : " + timePassed);
-
-				// Verify if need to run thread to wait until response time
-				// constraint
-				if (timePassed < RealTimeHelper.MAX_RESPONSE_TIME) {
-					waitTimeBeforeResponse = (RealTimeHelper.MAX_RESPONSE_TIME - timePassed)
-							* RealTimeHelper.MILLISECONDS;
-					tRealTimeResponse.run();
-				}
-
-				// Syncronize to wait until response time constraint
-				synchronized (tRealTimeResponse) {
-					endTime = System.currentTimeMillis();
-
-					System.out.println("FINAL TIME : " + RealTimeHelper.timePassed(initialTime, endTime));
-
-					result.redirectTo(UserAccountController.class).view(userId, userSession);
-				}
-
-			}
-
-=======
-			
-			 tLogin.run();
-			
+		
 			 //Syncronize to wait until response time constraint
 			 synchronized (tRealTimeResponse) {
 				 if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
@@ -204,8 +110,7 @@ public class UserAccountController {
 				        
 				}
 			 }
-			 
->>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
+
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -215,76 +120,10 @@ public class UserAccountController {
 
 			validator.add(new SimpleMessage("bad.user.login", "Got Timeout!", Severity.ERROR));
 			validator.onErrorRedirectTo(UserAccountController.class).loginForm();
-
 		}
-<<<<<<< HEAD
 
 	}
 
-	/*
-	 * private static UserAccount loginWithTimeOut(final UserAccountDao dao,
-	 * final UserAccount userAccount, final long startTime) throws Exception {
-	 * 
-	 * UserAccount user = null;
-	 * 
-	 * try { user = TimeoutForMethodsHelper.runWithTimeout(new
-	 * Callable<UserAccount>() {
-	 * 
-	 * @Override public UserAccount call() throws Exception { return
-	 * dao.login(userAccount); }
-	 * 
-	 * }, RealTimeHelper.MAX_RESPONSE_TIME, TimeUnit.SECONDS);
-	 * 
-	 * } catch (TimeoutException e) { log(startTime, "got timeout!"); }
-	 * 
-	 * return user; }
-	 * 
-	 * private static void log(long startTime, String msg) { long elapsedSeconds
-	 * = (System.currentTimeMillis() - startTime);
-	 * System.out.format("%1$5sms [%2$16s] %3$s\n", elapsedSeconds,
-	 * Thread.currentThread().getName(), msg); }
-	 */
-
-	public static Runnable tLogin = new Runnable() {
-
-		public void run() {
-			try {
-				userSession.login(staticDao.login(staticUserAccount));
-			} catch (Exception e) {
-			}
-
-		}
-	};
-
-	public static Runnable tRealTimeResponse = new Runnable() {
-		public void run() {
-			try {
-				Thread.sleep(waitTimeBeforeResponse);
-			} catch (Exception e) {
-			}
-
-		}
-	};
-
-	public static Runnable tMonitorLogin = new Runnable() {
-
-		public void run() {
-			try {
-
-				/*
-				 * while(){ }
-				 */
-
-			} catch (Exception e) {
-			}
-
-		}
-	};
-
-=======
-	   
-	 }
-	
 	// Thread to make a new login
 	public static Runnable tLogin = new Runnable() {
 	    public void run() {
@@ -302,8 +141,7 @@ public class UserAccountController {
 	       } catch (Exception e){}
 	    }
 	};
-	    
->>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
+
 	@Path("/logout")
 	public void logout() {
 		userSession.logout();
@@ -324,7 +162,7 @@ public class UserAccountController {
 	@Transactional
 	public void add(UserAccount userAccount) {
 		dao.save(userAccount);
-		result.redirectTo(UserAccountController.class).list();
+		 result.redirectTo(UserAccountController.class).loginForm();
 	}
 
 	@Get("/view/{id}")
