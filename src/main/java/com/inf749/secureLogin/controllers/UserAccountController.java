@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import com.inf749.secureLogin.daos.ConnectionHistoryDao;
@@ -28,6 +29,7 @@ import br.com.caelum.vraptor.validator.Validator;
 @Controller
 @Path("/useraccount")
 public class UserAccountController {
+<<<<<<< HEAD
 
 	@Inject
 	private UserAccountDao dao;
@@ -50,10 +52,32 @@ public class UserAccountController {
 		this(null, null);
 	}
 
+=======
+	
+	 @Inject
+	 private UserAccountDao dao;
+	 @Inject
+	 private ConnectionHistoryDao historyDao;
+	 @Inject
+	 private Validator validator;
+	 private static UserSession userSession;
+	 private final Result result;
+	 private static long waitTimeBeforeResponse;
+	 private static UserAccount staticUserAccount;
+	 
+	 private static UserAccountDao staticDao;
+	 private final HttpServletRequest request;
+		
+	 public UserAccountController() {
+		this(null, null, null);
+	 }
+	 
+>>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
 	@Inject
-	public UserAccountController(Result result, UserSession userSession) {
+	public UserAccountController(Result result, UserSession userSession, HttpServletRequest request) {
 		this.result = result;
 		this.userSession = userSession;
+		this.request = request;
 	}
 
 	@Get("/login")
@@ -63,12 +87,21 @@ public class UserAccountController {
 
 	@Post("/login")
 	public void login(final UserAccount userAccount) {
+<<<<<<< HEAD
 		long initialTime = System.currentTimeMillis();
 
+=======
+		long initialTime = System.currentTimeMillis(); 
+		
+		waitTimeBeforeResponse = RealTimeHelper.MAX_RESPONSE_TIME * RealTimeHelper.MILLISECONDS;
+		tRealTimeResponse.run();
+		
+>>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
 		try {
 
 			staticDao = this.dao;
 			staticUserAccount = userAccount;
+<<<<<<< HEAD
 
 			tLogin.run();
 
@@ -132,6 +165,47 @@ public class UserAccountController {
 
 			}
 
+=======
+			
+			 tLogin.run();
+			
+			 //Syncronize to wait until response time constraint
+			 synchronized (tRealTimeResponse) {
+				 if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
+					 
+					 ConnectionHistory history = new ConnectionHistory();
+					 history.setIpConnection(request.getRemoteHost());
+					 history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+					 history.setUserId(1);
+					 history.setValidConnection(false);
+						
+					 long endTime = System.currentTimeMillis();
+					
+					 System.out.println("TIME ERROR : " + RealTimeHelper.timePassed(initialTime, endTime));  
+					
+					 result.include("badUserLogin", "Username or password is not valid");
+					 result.redirectTo(ConnectionHistoryController.class).addHistoryNotConnected(history, userSession);
+				 }
+				 else {
+					
+					  Integer userId = userSession.getUser().getUserId();
+						
+					  ConnectionHistory history = new ConnectionHistory();
+					  history.setIpConnection(request.getRemoteHost());
+					  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+					  history.setUserId(userId);
+					  history.setValidConnection(true);
+					  
+					  long endTime = System.currentTimeMillis();
+						  
+					  System.out.println("FINAL TIME : " + RealTimeHelper.timePassed(initialTime, endTime));
+						  
+					  result.redirectTo(ConnectionHistoryController.class).addHistoryConnected(history, userSession, userId);
+				        
+				}
+			 }
+			 
+>>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -143,6 +217,7 @@ public class UserAccountController {
 			validator.onErrorRedirectTo(UserAccountController.class).loginForm();
 
 		}
+<<<<<<< HEAD
 
 	}
 
@@ -206,6 +281,29 @@ public class UserAccountController {
 		}
 	};
 
+=======
+	   
+	 }
+	
+	// Thread to make a new login
+	public static Runnable tLogin = new Runnable() {
+	    public void run() {
+           try{
+            	userSession.login(staticDao.login(staticUserAccount));	
+          } catch (Exception e){}
+        }
+    };
+	
+    // Thread to wait until response time constraint
+	public static Runnable tRealTimeResponse = new Runnable() {
+	    public void run() {
+	       try{
+	          Thread.sleep(waitTimeBeforeResponse);
+	       } catch (Exception e){}
+	    }
+	};
+	    
+>>>>>>> e0c0b9ba32ab44b244b5450b08d973fe6180a446
 	@Path("/logout")
 	public void logout() {
 		userSession.logout();
