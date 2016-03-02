@@ -7,6 +7,16 @@
 <title>Insert title here</title>
 </head>
 <body>
+<div class="col-md-6 float-right">
+			<table>
+				<c:forEach items="${eList}" var="employee">
+				    <tr>
+				        <td>Employee ID: <c:out value="${employee.eid}"/></td>
+				        <td>Employee Pass: <c:out value="${employee.ename}"/></td>  
+				    </tr>
+				</c:forEach>
+			</table>
+</div>
 
 </body>
 </html>

@@ -21,7 +21,7 @@ public class UserAccount {
 	private String homePhone;
 	private String workPhone;
 	private Boolean activeAccount = Boolean.FALSE;
-	private Date bornDate;
+	private String bornDate;
 	private String userPwd;
 	private Boolean adminAccount;
 	
@@ -79,10 +79,10 @@ public class UserAccount {
 	public void setActiveAccount(Boolean activeAccount) {
 		this.activeAccount = activeAccount;
 	}
-	public Date getBornDate() {
+	public String getBornDate() {
 		return bornDate;
 	}
-	public void setBornDate(Date bornDate) {
+	public void setBornDate(String bornDate) {
 		this.bornDate = bornDate;
 	}
 	public String getUserPwd() {

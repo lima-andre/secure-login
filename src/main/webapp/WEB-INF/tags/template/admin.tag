@@ -19,7 +19,7 @@
 
 <body>
     
-  <nav class="navbar navbar-default">
+  <nav class="">
     <div class="container-fluid">
       <!-- div class="navbar-header">
 
