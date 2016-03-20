@@ -1,14 +1,17 @@
 package com.inf749.secureLogin.daos;
 
+import java.io.Serializable;
 import java.util.List;
 
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.inf749.secureLogin.models.UserAccount;
 
-public class UserAccountDao {
+@SessionScoped
+public class UserAccountDao implements Serializable{
 	
 	@Inject
 	private EntityManager entityManager;

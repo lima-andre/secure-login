@@ -11,37 +11,38 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.inf749.secureLogin.models.BlackList;
 import com.inf749.secureLogin.models.OneHourBlock;
 import com.inf749.secureLogin.models.PaginatedList;
 
 @Default
 @SessionScoped
-public class OneHourBlockDao implements Serializable{
+public class BlackListDao implements Serializable{
 	
 	@Inject
 	private EntityManager entityManager;
     
-	public void save(OneHourBlock oneHourBlock) {
-		entityManager.persist(oneHourBlock);
+	public void save(BlackList blackList) {
+		entityManager.persist(blackList);
 	}
 	
 	public OneHourBlock findById(Integer id) {
 		return entityManager.find(OneHourBlock.class, id);
 	}
 	
-	public void remove(OneHourBlock oneHourBlock)
+	public void remove(BlackList blackList)
 	{
-		entityManager.remove(oneHourBlock);
+		entityManager.remove(blackList);
 	}
 
-	public List<OneHourBlock> getOneHourBlockByUser(Integer userId) {
+	public List<BlackList> getOneHourBlockByUser(Integer userId) {
 
-		Query query = entityManager.createQuery("Select o from OneHourBlock o where "
+		Query query = entityManager.createQuery("Select o from BlackList o where "
                 + "userid= :userid");
         query.setParameter("userid", userId);
         
         try{ 
-        	List<OneHourBlock> block = (List<OneHourBlock>) query.getResultList();
+        	List<BlackList> block = (List<BlackList>) query.getResultList();
              return block; 
             }catch(Exception e){ 	          
                return null; 
@@ -56,15 +57,14 @@ public class OneHourBlockDao implements Serializable{
 	public Integer getNumberBlockToday(String userName, String ipConnection) {
 		
 		Calendar dateIni = new GregorianCalendar();
-		dateIni.set(Calendar.HOUR, -24);
-		/*dateIni.set(Calendar.HOUR, 0);
+		dateIni.set(Calendar.HOUR, 0);
 		dateIni.set(Calendar.MINUTE, 0);
-		dateIni.set(Calendar.SECOND, 0);*/
+		dateIni.set(Calendar.SECOND, 0);
 		
 		Calendar dateEnd = new GregorianCalendar();
-		/*dateEnd.set(Calendar.HOUR, 23);
+		dateEnd.set(Calendar.HOUR, 23);
 		dateEnd.set(Calendar.MINUTE, 59);
-		dateEnd.set(Calendar.SECOND, 59);*/
+		dateEnd.set(Calendar.SECOND, 59);
 		
 		Query query = entityManager
 				.createQuery("select count(*) from OneHourBlock where username= :userName "
@@ -75,10 +75,6 @@ public class OneHourBlockDao implements Serializable{
 		query.setParameter("ipConnection", ipConnection);
 
 		try {
-			
-			System.out.println("#####  [OneHourBlockDao] - DATE INI : " + dateIni.getTime());
-			System.out.println("#####  [OneHourBlockDao] - DATE INI : " + dateEnd.getTime());
-			
 			Number connectionFailed = (Number) query.getSingleResult();
 			return connectionFailed.intValue();
 		} catch (Exception e) {

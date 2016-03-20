@@ -9,7 +9,10 @@ import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Result;
 
 import com.inf749.secureLogin.daos.ConnectionHistoryDao;
+import com.inf749.secureLogin.models.BlackList;
 import com.inf749.secureLogin.models.ConnectionHistory;
+import com.inf749.secureLogin.models.OneDayBlock;
+import com.inf749.secureLogin.models.OneHourBlock;
 import com.inf749.secureLogin.models.UserSession;
 
 @Controller
@@ -37,6 +40,23 @@ public class ConnectionHistoryController {
 		 result.redirectTo(UserAccountController.class).view(userId, userSession);
 	 }
 	 
+	 @Get("/getNumberOfConnectionFailedToday")
+	 @Transactional
+	 public Integer getNumberOfConnectionFailedToday(String userName, String ipConnection) {
+		 return historyDao.getNumberOfConnectionFailedToday(userName, ipConnection);
+	 }
+	 
+	 @Get("/addHistoryAndOneHourBlock")
+	 @Transactional 
+	 public void addHistoryAndOneHourBlock(ConnectionHistory history,
+			UserSession userSession, OneHourBlock oneHourBlock) {
+		
+		 historyDao.save(history);
+		 
+		 result.redirectTo(OneHourBlockController.class).addOneHourBlock(oneHourBlock, userSession);
+		
+	}
+	 
 	 @Get("/addHistoryNotConnected")
 	 @Transactional
 	 public void addHistoryNotConnected(ConnectionHistory history, UserSession userSession) {
@@ -44,5 +64,16 @@ public class ConnectionHistoryController {
 		 
 		 result.redirectTo(UserAccountController.class).loginForm();
 	 }
+
+	public void addHistoryAndOneDayBlock(ConnectionHistory history,
+			UserSession userSession, OneDayBlock oneDayBlock,
+			BlackList blackList) {
+		
+		historyDao.save(history);
+		 
+		 result.redirectTo(OneDayBlockController.class).addOneHourBlock(oneDayBlock, userSession, blackList);
+		
+	}
+
 	 
 }

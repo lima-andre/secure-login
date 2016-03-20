@@ -1,5 +1,6 @@
 package com.inf749.secureLogin.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Entity;
@@ -8,12 +9,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class OneHourBlock {
+public class OneHourBlock implements Serializable{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	private Integer userId;
+	private String userName;
 	private Timestamp timestampCreation;
 	private String ipConnection;
 	
@@ -28,6 +30,12 @@ public class OneHourBlock {
 	}
 	public void setUserId(Integer userId) {
 		this.userId = userId;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 	public Timestamp getTimestampCreation() {
 		return timestampCreation;

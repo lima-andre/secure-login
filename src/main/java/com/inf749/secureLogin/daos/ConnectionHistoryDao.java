@@ -43,29 +43,33 @@ public class ConnectionHistoryDao {
 		}
 	}
 
-	public Integer getNumberOfConnectionFailedToday(Integer userId, String ipConnection) {
+	public Integer getNumberOfConnectionFailedToday(String userName, String ipConnection) {
 		
 		Calendar dateIni = new GregorianCalendar();
-		dateIni.set(Calendar.HOUR, 0);
+		dateIni.set(Calendar.HOUR, -1);
+		/*dateIni.set(Calendar.HOUR, 0);
 		dateIni.set(Calendar.MINUTE, 0);
-		dateIni.set(Calendar.SECOND, 0);
+		dateIni.set(Calendar.SECOND, 0);*/
 		
 		Calendar dateEnd = new GregorianCalendar();
-		dateEnd.set(Calendar.HOUR, 23);
+		/*dateEnd.set(Calendar.HOUR, 23);
 		dateEnd.set(Calendar.MINUTE, 59);
-		dateEnd.set(Calendar.SECOND, 59);
+		dateEnd.set(Calendar.SECOND, 59);*/
 		
 		Query query = entityManager
-				.createQuery("select count(*) from ConnectionHistory where validconnection = false and userid= :userid "
+				.createQuery("select count(*) from ConnectionHistory where validconnection = '0' and username= :userName "
 						+ "and ipconnection = :ipConnection and timestampcreation between :dateIni and :dateEnd");
-		query.setParameter("userid", userId);		
+		query.setParameter("userName", userName);		
 		query.setParameter("dateIni", dateIni);
 		query.setParameter("dateEnd", dateEnd);
 		query.setParameter("ipConnection", ipConnection);
 
 		try {
-			Integer connectionFailed = (Integer) query.getSingleResult();
-			return connectionFailed;
+			System.out.println("#####  [ConnectionHistoryDao] - DATE INI : " + dateIni.getTime());
+			System.out.println("#####  [ConnectionHistoryDao] - DATE INI : " + dateEnd.getTime());
+			
+			Number connectionFailed = (Number) query.getSingleResult();
+			return connectionFailed.intValue();
 		} catch (Exception e) {
 			return 0;
 		}

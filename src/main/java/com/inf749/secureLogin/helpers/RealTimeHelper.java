@@ -2,7 +2,7 @@ package com.inf749.secureLogin.helpers;
 
 public class RealTimeHelper {
 	
-	public static final long MAX_RESPONSE_TIME = 5;
+	public static final long MAX_RESPONSE_TIME = 2;
 	public static final long MILLISECONDS = 1000;
 	
 	public static long timePassed(long initialTime, long finalTime){

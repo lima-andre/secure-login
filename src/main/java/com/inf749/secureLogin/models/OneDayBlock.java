@@ -1,5 +1,6 @@
 package com.inf749.secureLogin.models;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Entity;
@@ -8,22 +9,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class ConnectionHistory {
+public class OneDayBlock implements Serializable{
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer idConnection;
+	private Integer id;
 	private Integer userId;
 	private String userName;
 	private Timestamp timestampCreation;
-	private Boolean validConnection;
 	private String ipConnection;
 	
-	public Integer getIdConnection() {
-		return idConnection;
+	public Integer getId() {
+		return id;
 	}
-	public void setIdConnection(Integer idConnection) {
-		this.idConnection = idConnection;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 	public Integer getUserId() {
 		return userId;
@@ -42,12 +42,6 @@ public class ConnectionHistory {
 	}
 	public void setTimestampCreation(Timestamp timestampCreation) {
 		this.timestampCreation = timestampCreation;
-	}
-	public Boolean getValidConnection() {
-		return validConnection;
-	}
-	public void setValidConnection(Boolean validConnection) {
-		this.validConnection = validConnection;
 	}
 	public String getIpConnection() {
 		return ipConnection;

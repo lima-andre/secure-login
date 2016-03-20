@@ -8,37 +8,42 @@ import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Result;
 
+import com.inf749.secureLogin.daos.BlackListDao;
 import com.inf749.secureLogin.daos.OneHourBlockDao;
+import com.inf749.secureLogin.models.BlackList;
 import com.inf749.secureLogin.models.OneHourBlock;
 import com.inf749.secureLogin.models.UserSession;
 
 @Controller
 @Path("/useraccount")
-public class OneHourBlockController {
+public class BlackListController {
 	
 	 @Inject
-	 private OneHourBlockDao oneHourBlockDao;
+	 private BlackListDao blackListDao;
 	 private final Result result;
 	 
-	 public OneHourBlockController() {
+	 public BlackListController() {
 		 this(null);
 	 }
 	 
 	 @Inject
-	 public OneHourBlockController(Result result) {
+	 public BlackListController(Result result) {
 		this.result = result;
 	}
 	 
 	 @Transactional
-	 public void addOneHourBlock(OneHourBlock history, UserSession userSession) {
-		 oneHourBlockDao.save(history);
+	 public void addBlackList(BlackList blackList, UserSession userSession) {
+		 blackListDao.save(blackList);
 		 
 		 result.redirectTo(UserAccountController.class).loginForm();
 	 }
 	 
-	 @Get("/getNumberBlockToday")
+	 @Get("/isUserInBlackList")
 	 @Transactional
-	 public Integer getNumberBlockToday(String userName, String ipConnection) {
-		 return oneHourBlockDao.getNumberBlockToday(userName, ipConnection);
+	 public Boolean isUserInBlackList(String userName, String ipConnection) {
+		 
+		 //return oneHourBlockDao.getNumberBlockToday(userName, ipConnection);
+		 
+		 return false;
 	 }
 }

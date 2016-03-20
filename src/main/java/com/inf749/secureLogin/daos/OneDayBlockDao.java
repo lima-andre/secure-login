@@ -11,37 +11,38 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.inf749.secureLogin.models.OneDayBlock;
 import com.inf749.secureLogin.models.OneHourBlock;
 import com.inf749.secureLogin.models.PaginatedList;
 
 @Default
 @SessionScoped
-public class OneHourBlockDao implements Serializable{
+public class OneDayBlockDao implements Serializable{
 	
 	@Inject
 	private EntityManager entityManager;
     
-	public void save(OneHourBlock oneHourBlock) {
-		entityManager.persist(oneHourBlock);
+	public void save(OneDayBlock oneDayBlock) {
+		entityManager.persist(oneDayBlock);
 	}
 	
 	public OneHourBlock findById(Integer id) {
 		return entityManager.find(OneHourBlock.class, id);
 	}
 	
-	public void remove(OneHourBlock oneHourBlock)
+	public void remove(OneDayBlock oneDayBlock)
 	{
-		entityManager.remove(oneHourBlock);
+		entityManager.remove(oneDayBlock);
 	}
 
-	public List<OneHourBlock> getOneHourBlockByUser(Integer userId) {
+	public List<OneDayBlock> getOneHourBlockByUser(Integer userId) {
 
-		Query query = entityManager.createQuery("Select o from OneHourBlock o where "
+		Query query = entityManager.createQuery("Select o from 24HourBlock o where "
                 + "userid= :userid");
         query.setParameter("userid", userId);
         
         try{ 
-        	List<OneHourBlock> block = (List<OneHourBlock>) query.getResultList();
+        	List<OneDayBlock> block = (List<OneDayBlock>) query.getResultList();
              return block; 
             }catch(Exception e){ 	          
                return null; 
@@ -50,7 +51,7 @@ public class OneHourBlockDao implements Serializable{
 	
 	public PaginatedList paginated(int page, int max)
 	   {
-	      return new PaginatorQueryHelper().list(entityManager, OneHourBlock.class, page, max);
+	      return new PaginatorQueryHelper().list(entityManager, OneDayBlock.class, page, max);
 	   }
 
 	public Integer getNumberBlockToday(String userName, String ipConnection) {
@@ -67,7 +68,7 @@ public class OneHourBlockDao implements Serializable{
 		dateEnd.set(Calendar.SECOND, 59);*/
 		
 		Query query = entityManager
-				.createQuery("select count(*) from OneHourBlock where username= :userName "
+				.createQuery("select count(*) from 24HourBlock where username= :userName "
 						+ "and ipconnection = :ipConnection and timestampcreation between :dateIni and :dateEnd");
 		query.setParameter("userName", userName);		
 		query.setParameter("dateIni", dateIni);
@@ -75,9 +76,8 @@ public class OneHourBlockDao implements Serializable{
 		query.setParameter("ipConnection", ipConnection);
 
 		try {
-			
-			System.out.println("#####  [OneHourBlockDao] - DATE INI : " + dateIni.getTime());
-			System.out.println("#####  [OneHourBlockDao] - DATE INI : " + dateEnd.getTime());
+			System.out.println("#####  [OneDayBlockDao] - DATE INI : " + dateIni.getTime());
+			System.out.println("#####  [OneDayBlockDao] - DATE INI : " + dateEnd.getTime());
 			
 			Number connectionFailed = (Number) query.getSingleResult();
 			return connectionFailed.intValue();
