@@ -18,6 +18,20 @@ public class ConnectionHistory {
 	private Timestamp timestampCreation;
 	private Boolean validConnection;
 	private String ipConnection;
+    private String duration;
+	
+	/**
+	 * @return the duration
+	 */
+	public String getDuration() {
+		return duration;
+	}
+	/**
+	 * @param duration the duration to set
+	 */
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
 	
 	public Integer getIdConnection() {
 		return idConnection;

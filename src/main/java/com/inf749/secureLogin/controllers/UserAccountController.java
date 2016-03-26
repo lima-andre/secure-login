@@ -107,6 +107,8 @@ public class UserAccountController {
 					 
 					 Integer nbBadConnections = historyController.getNumberOfConnectionFailedToday(userAccount.getUserName(), request.getRemoteHost());
 					 
+					 history.setDuration(String.valueOf(RealTimeHelper.timePassed(initialTime, endTime)));
+					 
 					 if(nbBlockedConnections >= 3){
 						 addInBlackListAndReturn(userAccount, history);
 					 }					 
@@ -130,10 +132,14 @@ public class UserAccountController {
 					  history.setUserId(userId);
 					  history.setValidConnection(true);
 					  
+					  
+					  
 					  long endTime = System.currentTimeMillis();
 						  
 					  System.out.println("FINAL TIME : " + RealTimeHelper.timePassed(initialTime, endTime));
 						  
+					  history.setDuration(String.valueOf(RealTimeHelper.timePassed(initialTime, endTime)));
+					  
 					  result.redirectTo(ConnectionHistoryController.class).addHistoryConnected(history, userSession, userId);
 				        
 				}
