@@ -108,3 +108,12 @@ ALTER TABLE `BlackList` ADD CONSTRAINT `userBlackList` FOREIGN KEY (`userid`) RE
 ALTER TABLE `ConnectionHistory` ADD CONSTRAINT `userConnectionHistory` FOREIGN KEY (`userid`) REFERENCES `UserAccount` (`userid`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ;
 
+alter table onehourblock add column timestampcreation timestamp;
+
+alter table onehourblock add column username varchar(16);
+
+alter table connectionhistory add column username varchar(16);
+
+alter table connectionhistory add column duration varchar(5);
+
+alter table 24hoursblock add column username varchar(16);
