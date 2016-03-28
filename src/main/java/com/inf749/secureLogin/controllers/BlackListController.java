@@ -9,10 +9,7 @@ import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Result;
 
 import com.inf749.secureLogin.daos.BlackListDao;
-import com.inf749.secureLogin.daos.OneHourBlockDao;
 import com.inf749.secureLogin.models.BlackList;
-import com.inf749.secureLogin.models.OneHourBlock;
-import com.inf749.secureLogin.models.UserSession;
 
 @Controller
 @Path("/useraccount")
@@ -32,7 +29,7 @@ public class BlackListController {
 	}
 	 
 	 @Transactional
-	 public void addBlackList(BlackList blackList, UserSession userSession) {
+	 public void addBlackList(BlackList blackList) {
 		 blackListDao.save(blackList);
 		 
 		 result.redirectTo(UserAccountController.class).loginForm();

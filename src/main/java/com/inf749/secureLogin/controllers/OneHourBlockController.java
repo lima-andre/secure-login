@@ -38,7 +38,11 @@ public class OneHourBlockController {
 	 
 	 @Get("/getNumberBlockToday")
 	 @Transactional
-	 public Integer getNumberBlockToday(String userName, String ipConnection) {
+	 public Integer getNumberOfOneHourBlockedToday(String userName, String ipConnection) {
 		 return oneHourBlockDao.getNumberBlockToday(userName, ipConnection);
 	 }
+
+	public Integer getOneHourBlockByUser(String userName) {
+		return oneHourBlockDao.getOneHourBlockByUser(userName);		
+	}
 }

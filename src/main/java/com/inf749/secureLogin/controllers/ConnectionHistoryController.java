@@ -59,20 +59,18 @@ public class ConnectionHistoryController {
 	 
 	 @Get("/addHistoryNotConnected")
 	 @Transactional
-	 public void addHistoryNotConnected(ConnectionHistory history, UserSession userSession) {
+	 public void addHistoryNotConnected(ConnectionHistory history) {
 		 historyDao.save(history);
 		 
 		 result.redirectTo(UserAccountController.class).loginForm();
 	 }
 
-	public void addHistoryAndOneDayBlock(ConnectionHistory history,
-			UserSession userSession, OneDayBlock oneDayBlock,
-			BlackList blackList) {
-		
+	 public void addHistoryAndOneDayBlock(ConnectionHistory history, OneDayBlock oneDayBlock, BlackList blackList) {
+			
 		historyDao.save(history);
-		 
-		 result.redirectTo(OneDayBlockController.class).addOneHourBlock(oneDayBlock, userSession, blackList);
-		
+			 
+		result.redirectTo(OneDayBlockController.class).addOneDayBlock(oneDayBlock, blackList);
+			
 	}
 
 	 

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.1" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
   <persistence-unit name="default">
-    <class>com.inf749.secureLogin.models.Category</class>
-    <class>com.inf749.secureLogin.models.Product</class>
     <class>com.inf749.secureLogin.models.UserAccount</class>
     <class>com.inf749.secureLogin.models.ConnectionHistory</class>
     <properties>

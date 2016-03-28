@@ -1,7 +1,6 @@
 package com.inf749.secureLogin.daos;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.inf749.secureLogin.enums.TREnums;
 import com.inf749.secureLogin.models.ConnectionHistory;
 import com.inf749.secureLogin.models.PaginatedList;
 
@@ -46,15 +46,8 @@ public class ConnectionHistoryDao {
 	public Integer getNumberOfConnectionFailedToday(String userName, String ipConnection) {
 		
 		Calendar dateIni = new GregorianCalendar();
-		dateIni.set(Calendar.HOUR, -1);
-		/*dateIni.set(Calendar.HOUR, 0);
-		dateIni.set(Calendar.MINUTE, 0);
-		dateIni.set(Calendar.SECOND, 0);*/
-		
 		Calendar dateEnd = new GregorianCalendar();
-		/*dateEnd.set(Calendar.HOUR, 23);
-		dateEnd.set(Calendar.MINUTE, 59);
-		dateEnd.set(Calendar.SECOND, 59);*/
+		dateIni.add(Calendar.HOUR, -TREnums.ONEHOUR.getValue());
 		
 		Query query = entityManager
 				.createQuery("select count(*) from ConnectionHistory where validconnection = '0' and username= :userName "
@@ -65,9 +58,6 @@ public class ConnectionHistoryDao {
 		query.setParameter("ipConnection", ipConnection);
 
 		try {
-			System.out.println("#####  [ConnectionHistoryDao] - DATE INI : " + dateIni.getTime());
-			System.out.println("#####  [ConnectionHistoryDao] - DATE INI : " + dateEnd.getTime());
-			
 			Number connectionFailed = (Number) query.getSingleResult();
 			return connectionFailed.intValue();
 		} catch (Exception e) {

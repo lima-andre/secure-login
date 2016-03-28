@@ -3,7 +3,6 @@ package com.inf749.secureLogin.daos;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
 
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Default;
@@ -11,6 +10,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.inf749.secureLogin.enums.TREnums;
 import com.inf749.secureLogin.models.OneHourBlock;
 import com.inf749.secureLogin.models.PaginatedList;
 
@@ -34,18 +34,27 @@ public class OneHourBlockDao implements Serializable{
 		entityManager.remove(oneHourBlock);
 	}
 
-	public List<OneHourBlock> getOneHourBlockByUser(Integer userId) {
+	public Integer getOneHourBlockByUser(String userName) {
+		
+		entityManager.getEntityManagerFactory().getCache().evictAll();
+		
+		Calendar dateIni = new GregorianCalendar();
+		Calendar dateEnd = new GregorianCalendar();
+		dateIni.add(Calendar.HOUR, -TREnums.ONEHOUR.getValue());
+		
+		Query query = entityManager
+				.createQuery("select count(*) from OneHourBlock where userName= :userName "
+						+ "and timestampcreation between :dateIni and :dateEnd");
+		query.setParameter("userName", userName);		
+		query.setParameter("dateIni", dateIni);
+		query.setParameter("dateEnd", dateEnd);
 
-		Query query = entityManager.createQuery("Select o from OneHourBlock o where "
-                + "userid= :userid");
-        query.setParameter("userid", userId);
-        
-        try{ 
-        	List<OneHourBlock> block = (List<OneHourBlock>) query.getResultList();
-             return block; 
-            }catch(Exception e){ 	          
-               return null; 
-            } 
+		try {
+			Number connectionFailed = (Number) query.getSingleResult();
+			return connectionFailed.intValue();
+		} catch (Exception e) {
+			return 0;
+		}
 	}
 	
 	public PaginatedList paginated(int page, int max)
@@ -56,29 +65,17 @@ public class OneHourBlockDao implements Serializable{
 	public Integer getNumberBlockToday(String userName, String ipConnection) {
 		
 		Calendar dateIni = new GregorianCalendar();
-		dateIni.set(Calendar.HOUR, -24);
-		/*dateIni.set(Calendar.HOUR, 0);
-		dateIni.set(Calendar.MINUTE, 0);
-		dateIni.set(Calendar.SECOND, 0);*/
-		
 		Calendar dateEnd = new GregorianCalendar();
-		/*dateEnd.set(Calendar.HOUR, 23);
-		dateEnd.set(Calendar.MINUTE, 59);
-		dateEnd.set(Calendar.SECOND, 59);*/
+		dateIni.add(Calendar.HOUR, -TREnums.ONEDAY.getValue());
 		
 		Query query = entityManager
 				.createQuery("select count(*) from OneHourBlock where username= :userName "
-						+ "and ipconnection = :ipConnection and timestampcreation between :dateIni and :dateEnd");
+						+ "and timestampcreation between :dateIni and :dateEnd");
 		query.setParameter("userName", userName);		
 		query.setParameter("dateIni", dateIni);
 		query.setParameter("dateEnd", dateEnd);
-		query.setParameter("ipConnection", ipConnection);
 
 		try {
-			
-			System.out.println("#####  [OneHourBlockDao] - DATE INI : " + dateIni.getTime());
-			System.out.println("#####  [OneHourBlockDao] - DATE INI : " + dateEnd.getTime());
-			
 			Number connectionFailed = (Number) query.getSingleResult();
 			return connectionFailed.intValue();
 		} catch (Exception e) {

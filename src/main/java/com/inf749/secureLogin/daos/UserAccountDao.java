@@ -55,4 +55,21 @@ public class UserAccountDao implements Serializable{
             }
         return null; 
 	}
+	
+	public Integer getUserIdByUserName(UserAccount user) {
+
+		Query query = entityManager.createQuery("Select id from UserAccount u where "
+                + "username= :username");
+        query.setParameter("username", user.getUserName());
+        
+        try{ 
+        	Integer userId = (Integer) query.getSingleResult();
+            if (userId != null && userId > 0) { 
+              return userId; 
+            }  
+            }catch(Exception e){ 	          
+               return null; 
+            }
+        return null; 
+	}
 }

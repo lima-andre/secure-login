@@ -10,7 +10,6 @@ import br.com.caelum.vraptor.Result;
 import com.inf749.secureLogin.daos.OneDayBlockDao;
 import com.inf749.secureLogin.models.BlackList;
 import com.inf749.secureLogin.models.OneDayBlock;
-import com.inf749.secureLogin.models.UserSession;
 
 @Controller
 @Path("/useraccount")
@@ -30,19 +29,16 @@ public class OneDayBlockController {
 	}
 	 
 	 @Transactional
-	 public void addOneDayBlock(OneDayBlock oneDayBlock, UserSession userSession) {
-		 oneDayBlockDao.save(oneDayBlock);
-		 
-		 result.redirectTo(UserAccountController.class).loginForm();
-	 }
-
-	public void addOneHourBlock(OneDayBlock oneDayBlock,
-			UserSession userSession, BlackList blackList) {
-		
-		 oneDayBlockDao.save(oneDayBlock);
-		 
-		 result.redirectTo(BlackListController.class).addBlackList(blackList, userSession);
-		
+	 public void addOneDayBlock(OneDayBlock oneDayBlock, BlackList blackList) {
+			
+		oneDayBlockDao.save(oneDayBlock);
+			 
+		result.redirectTo(BlackListController.class).addBlackList(blackList);
+			
 	}
-	
+	 
+	 public Integer getOneDayBlockByUser(String userName) {
+		return oneDayBlockDao.getOneDayBlockByUser(userName);
+	 }
+	 
 }

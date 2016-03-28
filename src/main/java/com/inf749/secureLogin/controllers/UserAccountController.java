@@ -15,12 +15,10 @@ import br.com.caelum.vraptor.Path;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Put;
 import br.com.caelum.vraptor.Result;
-import br.com.caelum.vraptor.validator.Severity;
-import br.com.caelum.vraptor.validator.SimpleMessage;
-import br.com.caelum.vraptor.validator.Validator;
 
 import com.inf749.secureLogin.daos.ConnectionHistoryDao;
 import com.inf749.secureLogin.daos.UserAccountDao;
+import com.inf749.secureLogin.enums.TREnums;
 import com.inf749.secureLogin.helpers.RealTimeHelper;
 import com.inf749.secureLogin.models.BlackList;
 import com.inf749.secureLogin.models.ConnectionHistory;
@@ -33,31 +31,32 @@ import com.inf749.secureLogin.models.UserSession;
 @Path("/useraccount")
 public class UserAccountController {
 
-	 @Inject
-	 private UserAccountDao dao;
-	 @Inject
-	 private ConnectionHistoryDao historyDao;
-	 @Inject
-	 private Validator validator;
-	 @Inject
-	 private ConnectionHistoryController historyController;
-	 @Inject
-	 private OneHourBlockController oneHourBlockController;
-	 
-	 private static UserSession userSession;
-	 private final Result result;
-	 private static long waitTimeBeforeResponse;
-	 private static UserAccount staticUserAccount;
-	 
-	 private static UserAccountDao staticDao;
-	 private final HttpServletRequest request;
-		
-	 public UserAccountController() {
-		this(null, null, null);
-	 }
-	 
 	@Inject
-	public UserAccountController(Result result, UserSession userSession, HttpServletRequest request) {
+	private UserAccountDao dao;
+	@Inject
+	private ConnectionHistoryDao historyDao;
+	@Inject
+	private ConnectionHistoryController historyController;
+	@Inject
+	private OneHourBlockController oneHourBlockController;
+	@Inject
+	private OneDayBlockController oneDayBlockController;
+
+	private static UserSession userSession;
+	private final Result result;
+	private static long waitTimeBeforeResponse;
+	private static UserAccount staticUserAccount;
+
+	private static UserAccountDao staticDao;
+	private final HttpServletRequest request;
+
+	public UserAccountController() {
+		this(null, null, null);
+	}
+
+	@Inject
+	public UserAccountController(Result result, UserSession userSession,
+			HttpServletRequest request) {
 		this.result = result;
 		this.userSession = userSession;
 		this.request = request;
@@ -70,166 +69,154 @@ public class UserAccountController {
 
 	@Post("/login")
 	public void login(final UserAccount userAccount) {
+		
+		TRealTimeResponse tRealTimeResponse = new TRealTimeResponse();
+		long initialTime = System.currentTimeMillis();
 
-		long initialTime = System.currentTimeMillis(); 
+		Integer userId = this.dao.getUserIdByUserName(userAccount);
+
+		Boolean isBlockedForOneDay = RealTimeHelper.isOneDayBlocked(oneDayBlockController.getOneDayBlockByUser(userAccount.getUserName()));
+		Boolean isBlockedForOneHour = RealTimeHelper.isOneHourBlocked(oneHourBlockController.getOneHourBlockByUser(userAccount.getUserName()));
 		
-		waitTimeBeforeResponse = RealTimeHelper.MAX_RESPONSE_TIME * RealTimeHelper.MILLISECONDS;
-		//tRealTimeResponse.run();
-		
-		try {
+		if (isBlockedForOneDay) {
+			verifyTimeToWaitBeforeReturn(tRealTimeResponse, initialTime);
+			
+			result.include("badUserLogin", "This User is blocked for one day.");
+			result.redirectTo(UserAccountController.class).loginForm();
+		} else if (isBlockedForOneHour) {
+			verifyTimeToWaitBeforeReturn(tRealTimeResponse, initialTime);
+			
+			result.include("badUserLogin", "This User is blocked for one hour.");
+			result.redirectTo(UserAccountController.class).loginForm();
+		} else {
 
 			staticDao = this.dao;
 			staticUserAccount = userAccount;
 
-			//tLogin.run();
-			
 			TLogin tlogin = new TLogin();
-			TRealTimeResponse tRealTimeResponse = new TRealTimeResponse();
+
 			tlogin.run();
-			tRealTimeResponse.run();
-			
-			 //Syncronize to wait until response time constraint
-			 synchronized (tRealTimeResponse) {
-				 if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
-					 
-					 ConnectionHistory history = new ConnectionHistory();
-					 history.setIpConnection(request.getRemoteHost());
-					 history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-					 history.setUserId(1);
-					 history.setUserName(userAccount.getUserName());
-					 history.setValidConnection(false);
-						
-					 long endTime = System.currentTimeMillis();
-					
-					 System.out.println("TIME ERROR : " + RealTimeHelper.timePassed(initialTime, endTime));  
-					 
-					 Integer nbBlockedConnections = oneHourBlockController.getNumberBlockToday(userAccount.getUserName(), request.getRemoteHost());
-					 
-					 Integer nbBadConnections = historyController.getNumberOfConnectionFailedToday(userAccount.getUserName(), request.getRemoteHost());
-					 
-					 history.setDuration(String.valueOf(RealTimeHelper.timePassed(initialTime, endTime)));
-					 
-					 if(nbBlockedConnections >= 3){
-						 addInBlackListAndReturn(userAccount, history);
-					 }					 
-					 if(nbBadConnections >= 3){
-						 addOneHourBlockAndReturn(userAccount, history);
-						 
-					 } else {
-						 result.include("badUserLogin", "Username or password is not valid");
-						 result.redirectTo(ConnectionHistoryController.class).addHistoryNotConnected(history, userSession); 
-					 }
-					 
-					 
-				 }
-				 else {
-					
-					  Integer userId = userSession.getUser().getUserId();
-						
-					  ConnectionHistory history = new ConnectionHistory();
-					  history.setIpConnection(request.getRemoteHost());
-					  history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-					  history.setUserId(userId);
-					  history.setValidConnection(true);
-					  
-					  
-					  
-					  long endTime = System.currentTimeMillis();
-						  
-					  System.out.println("FINAL TIME : " + RealTimeHelper.timePassed(initialTime, endTime));
-						  
-					  history.setDuration(String.valueOf(RealTimeHelper.timePassed(initialTime, endTime)));
-					  
-					  result.redirectTo(ConnectionHistoryController.class).addHistoryConnected(history, userSession, userId);
-				        
+
+			if (userSession == null || userSession.getUser() == null || userSession.getUser().getUserId() == null) {
+
+				ConnectionHistory history = createHistoryObjectForBadConnection(userAccount, userId);
+
+				Integer nbOneHourBlockedConnections = oneHourBlockController.getNumberOfOneHourBlockedToday(userAccount.getUserName(), request.getRemoteHost());
+
+				Integer nbBadConnections = historyController.getNumberOfConnectionFailedToday(userAccount.getUserName(), request.getRemoteHost());
+				
+				verifyTimeToWaitBeforeReturn(tRealTimeResponse, initialTime);
+				
+				long endTime = System.currentTimeMillis();
+				history.setDuration(String.valueOf(RealTimeHelper.timePassed(initialTime, endTime)));
+				
+				if (nbOneHourBlockedConnections == 3 ) {
+					addOneDayBlockAndReturn(history);
+				} else if (nbBadConnections >= 2 && (nbBadConnections + 1) % 3 == 0) {
+					addOneHourBlockAndReturn(history);
+
+				} else {
+					result.include("badUserLogin","Username or password is not valid");
+					result.redirectTo(ConnectionHistoryController.class).addHistoryNotConnected(history);
 				}
-			 }
 
-		} catch (Exception e) {
-			e.printStackTrace();
+			} else {
 
-			long endTime = System.currentTimeMillis();
-
-			System.out.println("TIME ERROR : " + RealTimeHelper.timePassed(initialTime, endTime));
-
-			validator.add(new SimpleMessage("bad.user.login", "Got Timeout!", Severity.ERROR));
-			validator.onErrorRedirectTo(UserAccountController.class).loginForm();
+				ConnectionHistory history = createHistoryObjectForCorrectConnection(userAccount, userId);
+				
+				verifyTimeToWaitBeforeReturn(tRealTimeResponse, initialTime);
+				
+				long endTime = System.currentTimeMillis();
+					
+				history.setDuration(String.valueOf(RealTimeHelper.timePassed(initialTime, endTime)));
+					
+				result.redirectTo(ConnectionHistoryController.class).addHistoryConnected(history, userSession, userId);
+			}
 		}
 
 	}
-
-	private void addInBlackListAndReturn(UserAccount userAccount,
-			ConnectionHistory history) {
-		
-		 OneDayBlock oneDayBlock = new OneDayBlock();
-		 oneDayBlock.setIpConnection(request.getRemoteHost());
-		 oneDayBlock.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-		 oneDayBlock.setUserId(1);
-		 oneDayBlock.setUserName(userAccount.getUserName());
-		 
-		 BlackList blackList = new BlackList();
-		 blackList.setIpConnection(request.getRemoteHost());
-		 blackList.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-		 blackList.setUserId(1);
-		 blackList.setUserName(userAccount.getUserName());
-
-		 result.include("badUserLogin", "This User is blocked for one day.");
-		 result.redirectTo(ConnectionHistoryController.class).addHistoryAndOneDayBlock(history, userSession, oneDayBlock, blackList);
-		
-	}
-
-	private void addOneHourBlockAndReturn(final UserAccount userAccount,
-			ConnectionHistory history) {
-		OneHourBlock oneHourBlock = new OneHourBlock();
-		 oneHourBlock.setIpConnection(request.getRemoteHost());
-		 oneHourBlock.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-		 oneHourBlock.setUserId(1);
-		 oneHourBlock.setUserName(userAccount.getUserName());
-
-		 result.include("badUserLogin", "This User is blocked for an hour.");
-		 result.redirectTo(ConnectionHistoryController.class).addHistoryAndOneHourBlock(history, userSession, oneHourBlock);
-	}
-
-	// Thread to make a new login
-	/*public static Runnable tLogin = new Runnable() {
-	    public void run() {
-           try{
-            	userSession.login(staticDao.login(staticUserAccount));	
-          } catch (Exception e){}
-        }
-    };*/
 	
-	public class TLogin extends Thread{
-		public void run () {
-			userSession.login(staticDao.login(staticUserAccount));	
+	private void verifyTimeToWaitBeforeReturn(TRealTimeResponse tRealTimeResponse, long initialTime) {
+		long endTime = System.currentTimeMillis();
+		
+		waitTimeBeforeResponse = TREnums.RESPONSETIME.getValue();
+		
+		if(RealTimeHelper.timePassed(initialTime, endTime) < waitTimeBeforeResponse){
+			waitTimeBeforeResponse += (waitTimeBeforeResponse - RealTimeHelper.timePassed(initialTime, endTime)) * TREnums.MILLISECONDS.getValue();
+			
+			tRealTimeResponse.run();			
+		}		
+	}
+
+	private ConnectionHistory createHistoryObjectForCorrectConnection(final UserAccount userAccount, final Integer userId) {
+
+		ConnectionHistory history = new ConnectionHistory();
+		history.setIpConnection(request.getRemoteHost());
+		history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		history.setUserId(userId);
+		history.setUserName(userAccount.getUserName());
+		history.setValidConnection(true);
+
+		return history;
+	}
+
+	private ConnectionHistory createHistoryObjectForBadConnection(final UserAccount userAccount, final Integer userId) {
+
+		ConnectionHistory history = new ConnectionHistory();
+		history.setIpConnection(request.getRemoteHost());
+		history.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		history.setUserId(userId);
+		history.setUserName(userAccount.getUserName());
+		history.setValidConnection(false);
+
+		return history;
+	}
+
+	private void addOneDayBlockAndReturn(final ConnectionHistory history) {
+
+		OneDayBlock oneDayBlock = new OneDayBlock();
+		oneDayBlock.setIpConnection(request.getRemoteHost());
+		oneDayBlock.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		oneDayBlock.setUserId(history.getUserId());
+		oneDayBlock.setUserName(history.getUserName());
+		
+		BlackList blackList = new BlackList();
+		blackList.setIpConnection(request.getRemoteHost());
+		blackList.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		blackList.setUserId(history.getUserId());
+		blackList.setUserName(history.getUserName());
+
+		 result.include("badUserLogin", "This User will be blocked for one day.");
+		 result.redirectTo(ConnectionHistoryController.class).addHistoryAndOneDayBlock(history, oneDayBlock, blackList);
+
+	}
+
+	private void addOneHourBlockAndReturn(final ConnectionHistory history) {
+		OneHourBlock oneHourBlock = new OneHourBlock();
+		oneHourBlock.setIpConnection(request.getRemoteHost());
+		oneHourBlock.setTimestampCreation(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+		oneHourBlock.setUserId(history.getUserId());
+		oneHourBlock.setUserName(history.getUserName());
+
+		result.include("badUserLogin", "This User will be blocked for one hour.");
+		result.redirectTo(ConnectionHistoryController.class).addHistoryAndOneHourBlock(history, userSession, oneHourBlock);
+	}
+
+	public class TLogin extends Thread {
+		public void run() {
+			userSession.login(staticDao.login(staticUserAccount));
+		}
+	}
+
+	public class TRealTimeResponse extends Thread {
+		public void run() {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(waitTimeBeforeResponse);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		 }
+		}
 	}
-	
-	public class TRealTimeResponse extends Thread{
-		public void run () {
-			try {
-				Thread.sleep(waitTimeBeforeResponse);				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-		 }
-	}
-	
-    // Thread to wait until response time constraint
-	/*public static Runnable tRealTimeResponse = new Runnable() {
-	    public void run() {
-	       try{
-	          Thread.sleep(waitTimeBeforeResponse);
-	       } catch (Exception e){}
-	    }
-	};*/
 
 	@Path("/logout")
 	public void logout() {
@@ -251,7 +238,7 @@ public class UserAccountController {
 	@Transactional
 	public void add(UserAccount userAccount) {
 		dao.save(userAccount);
-		 result.redirectTo(UserAccountController.class).loginForm();
+		result.redirectTo(UserAccountController.class).loginForm();
 	}
 
 	@Get("/view/{id}")
