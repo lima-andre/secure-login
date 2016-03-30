@@ -51,11 +51,11 @@ public class ConnectionHistoryDao {
 		
 		Query query = entityManager
 				.createQuery("select count(*) from ConnectionHistory where validconnection = '0' and username= :userName "
-						+ "and ipconnection = :ipConnection and timestampcreation between :dateIni and :dateEnd");
+						+ "and timestampcreation between :dateIni and :dateEnd");
 		query.setParameter("userName", userName);		
 		query.setParameter("dateIni", dateIni);
 		query.setParameter("dateEnd", dateEnd);
-		query.setParameter("ipConnection", ipConnection);
+		//query.setParameter("ipConnection", ipConnection);
 
 		try {
 			Number connectionFailed = (Number) query.getSingleResult();

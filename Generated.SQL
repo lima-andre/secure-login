@@ -62,20 +62,17 @@ CREATE TABLE `OneHourBlock`
 CREATE INDEX `IX_Relationship3` ON `OneHourBlock` (`userid`)
 ;
 
--- Table 24HoursBlock
+-- Table OneDayBlock
 
-CREATE TABLE `24HoursBlock`
-(
-  `id` Int NOT NULL AUTO_INCREMENT,
-  `userid` Int,
-  `ipconnection` Varchar(20),
-  `timestempcreation` Timestamp NOT NULL,
-  PRIMARY KEY (`id`),
- UNIQUE `id` (`id`)
-)
-;
-
-CREATE INDEX `IX_Relationship4` ON `24HoursBlock` (`userid`)
+CREATE TABLE `OneDayBlock` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ipConnection` varchar(255) DEFAULT NULL,
+  `timestampCreation` datetime DEFAULT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `userName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE INDEX `IX_Relationship4` ON `OneDayBlock` (`userid`)
 ;
 
 -- Table BlackList
@@ -116,4 +113,4 @@ alter table connectionhistory add column username varchar(16);
 
 alter table connectionhistory add column duration varchar(5);
 
-alter table 24hoursblock add column username varchar(16);
+alter table OneDayBlock add column username varchar(16);

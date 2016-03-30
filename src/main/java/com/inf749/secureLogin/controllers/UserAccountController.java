@@ -234,7 +234,7 @@ public class UserAccountController {
 		return dao.listAll();
 	}
 
-	@Post("/add")
+	@Post("add")
 	@Transactional
 	public void add(UserAccount userAccount) {
 		dao.save(userAccount);
