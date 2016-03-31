@@ -87,7 +87,7 @@
                            <template:admin>
 							  
 							    <div class ="container min-container">      
-							      <form role="form" action="add" method="POST" class="registration-form">
+							      <form action="add" method="POST">
 							        <div class="form-group">
 			                    		<label class="sr-only" for="form-first-name">First Name:</label>
 			                        	<input type="text" class="form-first-name form-control" placeholder="First name..." name="userAccount.firstName" id="userAccount.firstName" value='${userAccount.firstName}' />
