@@ -96,7 +96,7 @@ CREATE INDEX `IX_Relationship5` ON `BlackList` (`userid`)
 ALTER TABLE `OneHourBlock` ADD CONSTRAINT `userOneHourBlock` FOREIGN KEY (`userid`) REFERENCES `UserAccount` (`userid`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ;
 
-ALTER TABLE `24HoursBlock` ADD CONSTRAINT `user24HoursBlock` FOREIGN KEY (`userid`) REFERENCES `UserAccount` (`userid`) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE `OneDayBlock` ADD CONSTRAINT `OneDayBlock` FOREIGN KEY (`userid`) REFERENCES `UserAccount` (`userid`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ;
 
 ALTER TABLE `BlackList` ADD CONSTRAINT `userBlackList` FOREIGN KEY (`userid`) REFERENCES `UserAccount` (`userid`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -114,3 +114,5 @@ alter table connectionhistory add column username varchar(16);
 alter table connectionhistory add column duration varchar(5);
 
 alter table OneDayBlock add column username varchar(16);
+
+alter table BlackList add column username varchar(16);
