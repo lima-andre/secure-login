@@ -53,7 +53,7 @@ CREATE TABLE `OneHourBlock`
   `id` Int NOT NULL AUTO_INCREMENT,
   `userid` Int,
   `ipconnection` Varchar(20),
-  `timestempcreation` Timestamp NOT NULL,
+  `timestampcreation` Timestamp NOT NULL,
   PRIMARY KEY (`id`),
  UNIQUE `id` (`id`)
 )
@@ -105,7 +105,6 @@ ALTER TABLE `BlackList` ADD CONSTRAINT `userBlackList` FOREIGN KEY (`userid`) RE
 ALTER TABLE `ConnectionHistory` ADD CONSTRAINT `userConnectionHistory` FOREIGN KEY (`userid`) REFERENCES `UserAccount` (`userid`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ;
 
-alter table onehourblock add column timestampcreation timestamp;
 
 alter table onehourblock add column username varchar(16);
 
